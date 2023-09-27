@@ -16,24 +16,28 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
     on<getWeather>((event, emit) async {
       Dio dio = Dio();
       emit(NetworkLoading());
-      try {
+
         var response = await dio.get(
             "http://api.weatherapi.com/v1/forecast.json?key=8c9416d38c45437a8a9105439231109&q=London&days=4");
+
         Box<WeatherApi> box = await Hive.box("weather");
-        final listener = InternetConnection().onStatusChange.listen((InternetStatus status) {
+      emit(NetworkSuccess(WeatherApi.fromJson(response.data)));
+        final listener = InternetConnection().onStatusChange.listen((InternetStatus status) async {
           switch (status) {
             case InternetStatus.connected:
-              box.put("offline", WeatherApi.fromJson(response.data));
+              box.add(WeatherApi.fromJson(response.data));
               emit(NetworkSuccess(WeatherApi.fromJson(response.data)));
+
               break;
             case InternetStatus.disconnected:
-              emit(NetworkSuccess(box.get("offline") as WeatherApi));
+              emit(NetworkSuccess(box.getAt(0) as WeatherApi));
+              print("ok");
               break;
+
           }
+          //await listener.cancel();
         });
-      } on DioException catch (e) {
-        emit(NetworkError(e.toString()));
-      }
+      listener.cancel();
     });
   }
 }
