@@ -1,9 +1,26 @@
 import 'package:bloc_weather/bloC/weather_bloc.dart';
+import 'package:bloc_weather/weather/weather_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 
-void main() {
+late Box box;
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter<WeatherApi>(WeatherApiAdapter());
+  Hive.registerAdapter<Forecast>(ForecastAdapter());
+  Hive.registerAdapter<Forecastday>(ForecastdayAdapter());
+  Hive.registerAdapter<Hour>(HourAdapter());
+  Hive.registerAdapter<Condition>(ConditionAdapter());
+  Hive.registerAdapter<Astro>(AstroAdapter());
+  Hive.registerAdapter<Day>(DayAdapter());
+  Hive.registerAdapter<Current>(CurrentAdapter());
+  Hive.registerAdapter<Location>(LocationAdapter());
+
+  box = await Hive.openBox<WeatherApi>("weather");
   runApp(MaterialApp(
       home: BlocProvider(
     create: (context) => WeatherBloc(),
