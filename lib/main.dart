@@ -23,10 +23,12 @@ void main() async {
 
   box = await Hive.openBox<WeatherApi>("weather");
   runApp(MaterialApp(
-      home: BlocProvider(
-    create: (context) => WeatherBloc(),
-    child: MyApp(),
-  )));
+    home: BlocProvider(
+      create: (context) => WeatherBloc(),
+      child: MyApp(),
+    ),
+    debugShowCheckedModeBanner: false,
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -39,7 +41,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String date = DateFormat("dd").format(DateTime.now());
   String today = DateFormat("MMM dd").format(DateTime.now());
-  int week_day = DateTime.now().weekday;
+  int week_day = DateTime
+      .now()
+      .weekday;
   Map<int, String> weekdayName = {
     1: "Mon",
     2: "Tue",
@@ -57,392 +61,507 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<WeatherBloc>(context).add(getWeather());
+    BlocProvider.of<WeatherBloc>(context).add(getWeather("Tashkent"));
   }
+
+  TextEditingController city = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: RefreshIndicator(child: BlocBuilder<WeatherBloc, WeatherState>(
-      builder: (BuildContext context, WeatherState state) {
-        if (state is NetworkLoading) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (state is NetworkError) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error,
-                  size: 50,
+          builder: (BuildContext context, WeatherState state) {
+            if (state is NetworkLoading) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is NetworkError) {
+              return Container(
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error,
+                      size: 50,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(state.error_message),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        BlocProvider.of<WeatherBloc>(context).add(
+                          getWeather("Tashkent"),
+                        );
+                      },
+                      child: Text("Refresh"),
+                    )
+                  ],
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(state.error_message),
-                SizedBox(
-                  height: 20,
-                ),
-                MaterialButton(
-                  onPressed: () {
-                    BlocProvider.of<WeatherBloc>(context).add(
-                      getWeather(),
-                    );
-                  },
-                  child: Text("Refresh"),
-                  color: Colors.green,
-                )
-              ],
-            ),
-          );
-        } else if (state is NetworkSuccess) {
-          return Scaffold(
-              body: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                    Colors.blueGrey[300] ?? Colors.transparent,
-                    Colors.lightBlueAccent,
-                    Colors.lightBlue,
-                    Colors.blue
-                  ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
-                  child: Stack(children: [
-                    Column(
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 0.1,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.05),
-                                  Icon(
-                                    Icons.location_on_sharp,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.02),
-                                  Text(
-                                    "${state.weather.location?.name}",
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 17),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.menu,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.05)
-                                ],
-                              ),
-                            ],
+              );
+            } else if (state is NetworkSuccess) {
+              return Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Colors.blueGrey[300],
+                    elevation: 0,
+                    actions: [
+                      Row(
+                        children: [
+                          SizedBox(width: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.05),
+                          Icon(
+                            Icons.location_on_sharp,
+                            color: Colors.white,
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.45,
-                            child: Column(
-                              children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      today,
-                                      style: TextStyle(
-                                        fontSize: 35,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.02),
-                                    Text(
-                                      "Updated ${state.weather.current?.lastUpdated}",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.06),
-                                Column(
-                                  children: [
-                                    Image.network(
-                                      "${state.weather.current?.condition?.icon}",
-                                    ),
-                                    Text(
-                                      "${state.weather.current?.condition?.text}",
-                                      style: TextStyle(
-                                        fontSize: 30,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${state.weather.current?.tempC}",
-                                          style: TextStyle(
-                                            fontSize: 45,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        Text(
-                                          "°C",
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ],
+                          SizedBox(width: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.02),
+                          Text(
+                            "${state.weather.location?.name}",
+                            style: TextStyle(color: Colors.white, fontSize: 17),
+                          ),
+                          SizedBox(width: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.02),
+                        ],
+                      ),
+                    ],
+                  ),
+                  drawer: Drawer(
+                    child: Container(
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Type region to see the weather",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                          Container(
+                            height: MediaQuery
+                                .of(context)
+                                .size
+                                .height * 0.08,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(
+                                controller: city,
+                                decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            20)),
+                                    hintText: "City"),
+                              ),
                             ),
                           ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 0.15,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.08,
-                                      child:
-                                          Image.asset("assets/humidity.png")),
-                                  Text(
-                                    "HUMIDITY",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  Text(
-                                    "${state.weather.current?.humidity} %",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.08,
-                                      child: Image.asset("assets/wind.png")),
-                                  Text(
-                                    "Wind",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  Text(
-                                    "${state.weather.current?.windKph} km/h",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.08,
-                                      child:
-                                          Image.asset("assets/FeelsLike.png")),
-                                  Text(
-                                    "FEELS LIKE",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  Text(
-                                    "${state.weather.current?.feelslikeC} °C",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(15),
-                          child: Container(
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              height: MediaQuery.of(context).size.height * 0.2,
+                          Container(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.4,
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width:
-                                    MediaQuery.of(context).size.width * 0.2,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text(
-                                          "${weekdayName[week_day + 1]}",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15),
-                                        ),
-                                        Column(
-                                          children: [
-                                            Container(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                    0.1,
-                                                child: Image.asset(
-                                                    "assets/wind.webp")),
-                                            Text(
-                                                "${state.weather.forecast?.forecastday?[0].day?.avgtempC} °C",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15))
-                                          ],
-                                        ),
-                                        Text(
-                                            "${state.weather.forecast?.forecastday?[0].day?.maxwindKph}\n"
-                                                "km/h",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15))
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width:
-                                    MediaQuery.of(context).size.width * 0.2,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text(
-                                          "${weekdayName[week_day + 2]}",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15),
-                                        ),
-                                        Column(
-                                          children: [
-                                            Container(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                    0.1,
-                                                child: Image.asset(
-                                                    "assets/wind.webp")),
-                                            Text(
-                                                "${state.weather.forecast?.forecastday?[1].day?.avgtempC} °C",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15))
-                                          ],
-                                        ),
-                                        Text(
-                                            "${state.weather.forecast?.forecastday?[1].day?.maxwindKph}\n"
-                                                "km/h",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15))
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width:
-                                    MediaQuery.of(context).size.width * 0.2,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text(
-                                          "${weekdayName[week_day + 3]}",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15),
-                                        ),
-                                        Column(
-                                          children: [
-                                            Container(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                    0.1,
-                                                child: Image.asset(
-                                                    "assets/wind.webp")),
-                                            Text(
-                                                "${state.weather.forecast?.forecastday?[2].day?.avgtempC} °C",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15))
-                                          ],
-                                        ),
-                                        Text(
-                                            "${state.weather.forecast?.forecastday?[2].day?.maxwindKph}\n"
-                                                "km/h",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15))
-                                      ],
-                                    ),
-                                  ),
-
-                                ],
-                              )
-                        )
-                        )],
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey),
+                              child: MaterialButton(
+                                onPressed: () {
+                                  if (city.text != "") {
+                                    BlocProvider.of<WeatherBloc>(context).add(getWeather(city.text));
+                                }
+                                },
+                                child: Text("Apply"),
+                              ))
+                        ],
+                      ),
                     ),
-                  ])));
-        } else {
-          return Container(
-            color: Colors.pink,
-          );
-        }
-      },
-    ), onRefresh: () async {
-      BlocProvider.of<WeatherBloc>(context).add(getWeather());
-    }));
+                  ),
+                  body: Container(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width,
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [
+                            Colors.blueGrey[300] ?? Colors.transparent,
+                            Colors.lightBlueAccent,
+                            Colors.lightBlue,
+                            Colors.blue
+                          ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter)),
+                      child: Stack(children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Container(
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width,
+                                height: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height * 0.45,
+                                child: Column(
+                                  children: [
+                                    Column(
+                                      children: [
+                                        Text(
+                                          today,
+                                          style: TextStyle(
+                                            fontSize: 35,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                            height:
+                                            MediaQuery
+                                                .of(context)
+                                                .size
+                                                .height *
+                                                0.02),
+                                        Text(
+                                          "Updated ${state.weather.current
+                                              ?.lastUpdated}",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                        height: MediaQuery
+                                            .of(context)
+                                            .size
+                                            .height *
+                                            0.06),
+                                    Column(
+                                      children: [
+                                        Image.network(
+                                          "https:${state.weather.current
+                                              ?.condition?.icon}",
+                                        ),
+                                        Text(
+                                          "${state.weather.current?.condition
+                                              ?.text}",
+                                          style: TextStyle(
+                                            fontSize: 30,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "${state.weather.current?.tempC}",
+                                              style: TextStyle(
+                                                fontSize: 45,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            Text(
+                                              "°C",
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width,
+                              height: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .height * 0.15,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment
+                                    .spaceAround,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.08,
+                                          child:
+                                          Image.asset("assets/humidity.png")),
+                                      Text(
+                                        "HUMIDITY",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "${state.weather.current?.humidity} %",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.08,
+                                          child: Image.asset(
+                                              "assets/wind.png")),
+                                      Text(
+                                        "Wind",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "${state.weather.current
+                                            ?.windKph} km/h",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.08,
+                                          child:
+                                          Image.asset("assets/FeelsLike.png")),
+                                      Text(
+                                        "FEELS LIKE",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "${state.weather.current
+                                            ?.feelslikeC} °C",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Container(
+                                    width: MediaQuery
+                                        .of(context)
+                                        .size
+                                        .width * 0.8,
+                                    height:
+                                    MediaQuery
+                                        .of(context)
+                                        .size
+                                        .height * 0.2,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.25,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                "${weekdayName[week_day + 1]}",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15),
+                                              ),
+                                              Column(
+                                                children: [
+                                                  Container(
+                                                      width: MediaQuery
+                                                          .of(context)
+                                                          .size
+                                                          .width *
+                                                          0.1,
+                                                      child: Image.asset(
+                                                          "assets/wind.webp")),
+                                                  Text(
+                                                      "${state.weather.forecast
+                                                          ?.forecastday?[0].day
+                                                          ?.avgtempC} °C",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15))
+                                                ],
+                                              ),
+                                              Text(
+                                                  "${state.weather.forecast
+                                                      ?.forecastday?[0].day
+                                                      ?.maxwindKph}\n"
+                                                      "km/h",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15))
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.25,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                "${weekdayName[week_day + 2]}",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15),
+                                              ),
+                                              Column(
+                                                children: [
+                                                  Container(
+                                                      width: MediaQuery
+                                                          .of(context)
+                                                          .size
+                                                          .width *
+                                                          0.1,
+                                                      child: Image.asset(
+                                                          "assets/wind.webp")),
+                                                  Text(
+                                                      "${state.weather.forecast
+                                                          ?.forecastday?[1].day
+                                                          ?.avgtempC} °C",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15))
+                                                ],
+                                              ),
+                                              Text(
+                                                  "${state.weather.forecast
+                                                      ?.forecastday?[1].day
+                                                      ?.maxwindKph}\n"
+                                                      "km/h",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15))
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .width *
+                                              0.25,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                "${weekdayName[week_day + 3]}",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15),
+                                              ),
+                                              Column(
+                                                children: [
+                                                  Container(
+                                                      width: MediaQuery
+                                                          .of(context)
+                                                          .size
+                                                          .width *
+                                                          0.1,
+                                                      child: Image.asset(
+                                                          "assets/wind.webp")),
+                                                  Text(
+                                                      "${state.weather.forecast
+                                                          ?.forecastday?[2].day
+                                                          ?.avgtempC} °C",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15))
+                                                ],
+                                              ),
+                                              Text(
+                                                  "${state.weather.forecast
+                                                      ?.forecastday?[2].day
+                                                      ?.maxwindKph}\n"
+                                                      "km/h",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15))
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )))
+                          ],
+                        ),
+                      ])));
+            } else {
+              return Container();
+            }
+          },
+        ), onRefresh: () async {
+          BlocProvider.of<WeatherBloc>(context).add(getWeather("Tashkent"));
+        }));
   }
 }
