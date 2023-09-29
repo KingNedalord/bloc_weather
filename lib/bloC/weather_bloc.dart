@@ -17,27 +17,20 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
       Dio dio = Dio();
       emit(NetworkLoading());
 
+
+
+      Box<WeatherApi> box = await Hive.box("weather");
+      bool isOnline = await InternetConnection().hasInternetAccess;
+
+      if (isOnline == true) {
         var response = await dio.get(
-            "http://api.weatherapi.com/v1/forecast.json?key=8c9416d38c45437a8a9105439231109&q=London&days=4");
-
-        Box<WeatherApi> box = await Hive.box("weather");
-      emit(NetworkSuccess(WeatherApi.fromJson(response.data)));
-        final listener = InternetConnection().onStatusChange.listen((InternetStatus status) async {
-          switch (status) {
-            case InternetStatus.connected:
-              box.add(WeatherApi.fromJson(response.data));
-              emit(NetworkSuccess(WeatherApi.fromJson(response.data)));
-
-              break;
-            case InternetStatus.disconnected:
-              emit(NetworkSuccess(box.getAt(0) as WeatherApi));
-              print("ok");
-              break;
-
-          }
-          //await listener.cancel();
-        });
-      listener.cancel();
+            "http://api.weatherapi.com/v1/forecast.json?key=8c9416d38c45437a8a9105439231109&q=London&days=5&aqi=no&alerts=no");
+        box.put("weather",WeatherApi.fromJson(response.data));
+        emit(NetworkSuccess(WeatherApi.fromJson(response.data)));
+      } else {
+        emit(NetworkSuccess(box.get("weather") as WeatherApi)??NetworkLoading());
+      }
+      //await listener.cancel();
     });
   }
 }

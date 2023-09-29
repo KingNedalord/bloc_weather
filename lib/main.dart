@@ -7,7 +7,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 
 late Box box;
-void main() async{
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter<WeatherApi>(WeatherApiAdapter());
@@ -104,11 +105,11 @@ class _MyAppState extends State<MyApp> {
                   height: MediaQuery.of(context).size.height,
                   decoration: BoxDecoration(
                       gradient: LinearGradient(colors: [
-                        Colors.blueGrey[300]??Colors.transparent,
+                    Colors.blueGrey[300] ?? Colors.transparent,
                     Colors.lightBlueAccent,
                     Colors.lightBlue,
                     Colors.blue
-                  ],begin: Alignment.topCenter,end: Alignment.bottomCenter)),
+                  ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
                   child: Stack(children: [
                     Column(
                       children: [
@@ -308,19 +309,17 @@ class _MyAppState extends State<MyApp> {
                                 color: Colors.grey.withOpacity(0.6),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: 4,
-                                itemBuilder: (context, index) {
-                                  return Container(
+                              child: Row(
+                                children: [
+                                  Container(
                                     width:
-                                        MediaQuery.of(context).size.width * 0.2,
+                                    MediaQuery.of(context).size.width * 0.2,
                                     child: Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                      MainAxisAlignment.spaceAround,
                                       children: [
                                         Text(
-                                          "${weekdayName[index == 0 ? week_day + 1 : index == 1 ? week_day + 2 : index == 2 ? week_day + 3 : week_day + 4]}",
+                                          "${weekdayName[week_day + 1]}",
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 15),
@@ -329,32 +328,111 @@ class _MyAppState extends State<MyApp> {
                                           children: [
                                             Container(
                                                 width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
+                                                    .size
+                                                    .width *
                                                     0.1,
                                                 child: Image.asset(
                                                     "assets/wind.webp")),
                                             Text(
-                                                "${state.weather.forecast?.forecastday?[index].day?.avgtempC} °C",
+                                                "${state.weather.forecast?.forecastday?[0].day?.avgtempC} °C",
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 15))
                                           ],
                                         ),
                                         Text(
-                                            "${state.weather.forecast?.forecastday?[index].day?.maxwindKph}\n"
-                                            "km/h",
+                                            "${state.weather.forecast?.forecastday?[0].day?.maxwindKph}\n"
+                                                "km/h",
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 15))
                                       ],
                                     ),
-                                  );
-                                },
-                              )),
+                                  ),
+                                  Container(
+                                    width:
+                                    MediaQuery.of(context).size.width * 0.2,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text(
+                                          "${weekdayName[week_day + 2]}",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15),
+                                        ),
+                                        Column(
+                                          children: [
+                                            Container(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                    0.1,
+                                                child: Image.asset(
+                                                    "assets/wind.webp")),
+                                            Text(
+                                                "${state.weather.forecast?.forecastday?[1].day?.avgtempC} °C",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15))
+                                          ],
+                                        ),
+                                        Text(
+                                            "${state.weather.forecast?.forecastday?[1].day?.maxwindKph}\n"
+                                                "km/h",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15))
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width:
+                                    MediaQuery.of(context).size.width * 0.2,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text(
+                                          "${weekdayName[week_day + 3]}",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15),
+                                        ),
+                                        Column(
+                                          children: [
+                                            Container(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                    0.1,
+                                                child: Image.asset(
+                                                    "assets/wind.webp")),
+                                            Text(
+                                                "${state.weather.forecast?.forecastday?[2].day?.avgtempC} °C",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15))
+                                          ],
+                                        ),
+                                        Text(
+                                            "${state.weather.forecast?.forecastday?[2].day?.maxwindKph}\n"
+                                                "km/h",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15))
+                                      ],
+                                    ),
+                                  ),
+
+                                ],
+                              )
                         )
-                      ],
+                        )],
                     ),
                   ])));
         } else {
