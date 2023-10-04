@@ -5,7 +5,7 @@ abstract class WeatherState {}
 
 class WeatherInitial extends WeatherState {}
 
-class NetworkLoading extends WeatherState {}
+class NetworkLoading extends WeatherState {} 
 
 class NetworkError extends WeatherState {
   final String error_message;
